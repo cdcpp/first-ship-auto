@@ -1,5 +1,6 @@
 package com.cucupang.first_ship.service;
 
+import com.cucupang.first_ship.dto.KeywordDto;
 import com.google.common.reflect.TypeToken;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
@@ -15,7 +16,7 @@ import java.util.Optional;
 @Service
 public class GeminiApiService {
 
-    public String callGeminiApi(){
+    public List<KeywordDto> callGeminiApi(){
         Client client = new Client();
 
         GenerateContentResponse response =
@@ -23,12 +24,31 @@ public class GeminiApiService {
                         "gemini-2.5-flash",
                         "영양제의 종류를 30개의  json 형태로 돌려줘",
                         null);
-        System.out.println(parseKeywordsFromJson(response.text()).toString());
-        return response.text();
+
+        return parseKeywordsFromJson(response.text());
 
     };
 
-    public List<String> parseKeywordsFromJson(String jsonText){
+    public List<KeywordDto> parseKeywordsFromJson(String jsonText){
+        return Optional.ofNullable(jsonText)
+                .filter(text -> text.contains("[") && text.contains("]"))
+                .map(text -> text.substring(text.indexOf('['), text.lastIndexOf(']') + 1))
+                .map(this::parseJsonArray)
+                .orElseGet(()-> {
+                    System.out.println("JSON ARRAY NOT FOUND");    // thorws Exception
+                    return Collections.emptyList();
+                });
+    }
+
+
+    private List<KeywordDto> parseJsonArray(String jsonArrayString) {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonArrayString, new TypeToken<List<KeywordDto>>(){}.getType());
+    }
+
+
+
+   /* public List<String> parseKeywordsFromJson(String jsonText){
         int startIndex = jsonText.indexOf('[');
         int lastIndex = jsonText.lastIndexOf(']');
         String jsonArrayString = null;
@@ -45,7 +65,7 @@ public class GeminiApiService {
         List<String> keywordList = gson.fromJson(jsonArrayString, List.class);
 
         return keywordList;
-    }
+    }*/
 
 
 
