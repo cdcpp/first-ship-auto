@@ -1,12 +1,16 @@
 package com.cucupang.first_ship.service;
 
 import com.cucupang.first_ship.dto.KeywordDto;
+import com.cucupang.first_ship.entity.Keyword;
+import com.cucupang.first_ship.enu.SearchYn;
+import com.cucupang.first_ship.repository.KeywordRepository;
 import com.google.common.reflect.TypeToken;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Type;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -14,20 +18,37 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class GeminiApiService {
 
-    public List<KeywordDto> callGeminiApi(){
+    private final KeywordRepository keywordRepository;
+
+    public int callGeminiApi() {
         Client client = new Client();
 
         GenerateContentResponse response =
                 client.models.generateContent(
                         "gemini-2.5-flash",
-                        "영양제의 종류를 30개의  json 형태로 돌려줘",
+                        "영양제의 종류를 30개의  json 형태로 돌려줘" +
+                                "내가 응답받는 dto 형태는    " +
+                                "    private String relKeyword;\n" +
+                                "    private int monthlyPcQcCnt;\n" +
+                                "    private int monthlyMobileQcCnt;" +
+                                "이니까 , 이 변수명으로 줘야한단다",
                         null);
 
-        return parseKeywordsFromJson(response.text());
 
-    };
+        List<KeywordDto> keywordDtos = parseKeywordsFromJson(response.text());
+        for (KeywordDto keywordDto : keywordDtos) {
+            Keyword keyword = Keyword.builder()
+                    .keyword(keywordDto.getRelKeyword())
+                    .searchYn(SearchYn.N)
+                    .build();
+            keywordRepository.save(keyword);
+        }
+
+        return keywordRepository.findBySearchYn(SearchYn.N).size();
+}
 
     public List<KeywordDto> parseKeywordsFromJson(String jsonText){
         return Optional.ofNullable(jsonText)
@@ -38,6 +59,7 @@ public class GeminiApiService {
                     System.out.println("JSON ARRAY NOT FOUND");    // thorws Exception
                     return Collections.emptyList();
                 });
+
     }
 
 
