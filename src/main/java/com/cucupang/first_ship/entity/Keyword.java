@@ -8,6 +8,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="keyword")
@@ -33,4 +35,10 @@ public class Keyword {
         this.searchYn = searchYn;
     }
 
+    @OneToMany(mappedBy = "keyword")
+    private List<Goods> goodsList = new ArrayList<>();
+
+    public Keyword() {
+
+    }
 }
