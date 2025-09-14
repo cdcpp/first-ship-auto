@@ -3,6 +3,7 @@ package com.cucupang.first_ship.controller;
 
 import com.cucupang.first_ship.dto.KeywordDto;
 import com.cucupang.first_ship.service.GeminiApiService;
+import com.cucupang.first_ship.service.TistoryAutomationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,6 +28,17 @@ public class HelloController {
 
 
         return "hello";
+    }
+
+    @GetMapping("/testTistory")
+    public String testTistory(Model model) {
+
+        TistoryAutomationService tistoryAutomationService = new TistoryAutomationService();
+
+        tistoryAutomationService.loginToTistory();
+
+
+        return "";
     }
 
 
