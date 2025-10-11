@@ -17,7 +17,7 @@ import java.util.List;
 public class HelloController {
 
     private final GeminiApiService geminiApiService;
-
+    private final TistoryAutomationService tistoryAutomationService;
 
     @GetMapping("/hello")
     public String hello(Model model) {
@@ -31,11 +31,11 @@ public class HelloController {
     }
 
     @GetMapping("/testTistory")
-    public String testTistory(Model model) {
+    public String testTistory(Model model) throws InterruptedException {
 
-        TistoryAutomationService tistoryAutomationService = new TistoryAutomationService();
 
-        tistoryAutomationService.loginToTistory();
+        //tistoryAutomationService.loginToTistory();
+        tistoryAutomationService.postToTistory("1","2");
 
 
         return "";
